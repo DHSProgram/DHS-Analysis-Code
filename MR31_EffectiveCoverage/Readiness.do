@@ -1,9 +1,11 @@
 /*****************************************************************************************************
 Program: 			Readiness.do
 Purpose: 			Code readiness variables at the facility level to create composite readiness measure 
-						for the MR31 report on Effective Coverage. All key structural items were coded, 
-						but inclusion in readiness composite measures was determined as described in the report.
-Author:				Shireen Assaf and Sara Riese					
+					for the MR31 report on Effective Coverage. All key structural items were coded, 
+					but inclusion in readiness composite measures was determined as described in the report.
+						
+Author:				Shireen Assaf and Sara Riese	
+				
 Date last modified: May 27, 2021
 *****************************************************************************************************/
 
