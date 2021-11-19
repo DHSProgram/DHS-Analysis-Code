@@ -50,7 +50,7 @@ gen stratum_R=spastrata+1000
 if scid=="MW" | scid=="HT" {
 replace cluster_R=9999
 replace stratum_R=9999
-replace cluster_Q=9999
+replace cluster_Q=facil
 replace stratum_Q=9999
 
 }
