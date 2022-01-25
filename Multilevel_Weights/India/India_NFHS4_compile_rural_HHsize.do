@@ -4,12 +4,12 @@ Purpose: 	Compile the average size in number of households of India's villages
 Data inputs:	Separate excel files by districts from the webpage pf the Census of India https://censusindia.gov.in/pca/cdb_pca_census/cd_block.html. 
 		The user needs to download all the excel files and use this Stata code to compile the needed data for rural clusters. 
 Author: 	Tom Pullum
-Date last modified:  June 02, 2021 by Tom Pullum
+Date last modified:  January 25, 2022 by Mahmoud Elkasabi
 *******************************************************************************************************************************/
 * do e:\DHS\India\India_Census_2011\State_HH_files_do_2June2021.txt
 
 set more off
-cd e:\DHS\India\India_Census_2011
+cd "e:\DHS\India\India_Census_2011"
 
 scalar zero="0"
 
@@ -17,10 +17,10 @@ scalar zero="0"
 
 program define collapse_segment
 
-*drop if regexm(Town,"000000")==1
-drop if regexm(Level,"BLOCK")==1
+keep if regexm(TRU,"Rural")==1
 gen clusters=1
-quietly collapse (sum) clusters No_HH TOT_P TOT_M TOT_F, by(State District Level TRU)
+quietly collapse (sum) clusters No_HH TOT_P TOT_M TOT_F, by(State District)
+quietly gen avg_size = No_HH / clusters
 append using appended_file.dta
 save appended_file.dta, replace
 
