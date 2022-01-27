@@ -10,11 +10,11 @@ Such data is crucial for the approximation as the average number of households p
 
 To overcome this problem, the user needs to deal with the urban and rural clusters separately and using two different approaches as follows:
 
-1-	For urban clusters: we compiled a list of districts with the average size of clusters. 
+1-	For urban clusters: we compiled a list of districts with number of CEBs and the average size of clusters. 
 	The list can be found here (the excel sheet: EA average size_Urban.xlsx)
 
 2-	For rural clusters: the user can obtain data about the number of villages and their size (number of households) from the Census of India. 
 	This page includes the data in separate excel files by states and districts https://censusindia.gov.in/pca/cdb_pca_census/cd_block.html. 
-	The user needs to download all the excel files and use this Stata code (the file: India_NFHS4_compile_rural_HHsize.txt) to compile the needed data for rural clusters.
+	The user needs to download all the excel files and use this Stata code (the file: India_NFHS4_compile_rural_HHsize.do) to compile the needed data for rural clusters.
 
 
