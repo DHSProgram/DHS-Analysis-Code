@@ -1,6 +1,6 @@
 Readme MR31
 
-These files allow users to recreate the effective coverage cascades created for Methodological Report 31 (link).
+These files allow users to recreate the effective coverage cascades created for Methodological Report 31 (https://www.dhsprogram.com/publications/publication-mr31-methodological-reports.cfm?csSearch=554290_1).
 There are three do files included here. The components of the effective coverage cascade which were created from DHS datasets are not included, 
 as there is ample documentation for re-creating those variables elsewhere in GitHub. ANC variables can be found here 
 (https://github.com/DHSProgram/DHS-Indicators-Stata/blob/master/Chap09_RH/RH_ANC.do) and sick child variables 
