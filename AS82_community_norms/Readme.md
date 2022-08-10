@@ -19,5 +19,3 @@ The do files are:
 
 4. RegionalMLM.do
    This do file includes the multilevel models by region.
-
-
