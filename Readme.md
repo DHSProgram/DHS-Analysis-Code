@@ -1,6 +1,3 @@
-
-
-
 # The DHS Program Analysis code
 
 This repository contains code that users may find useful when analyzing DHS survey data. 
@@ -22,7 +19,8 @@ This can be found in Chapter 1 section "Analyzing DHS Data" in the Guide to DHS 
 
 ## Code used in analysis reports
 
-When possible code that was used for analysis reports will be made available in this repository. 
-The code will be stored in folder with the report ID (for instance MR31 for the methodological report on Effective Coverage).
+When possible code that was used for DHS analysis reports will be made available in this repository. 
+The code will be stored in folder with the report ID (for instance AS81 for the urban poverty report) 
+or by topic (for instance Effective Coverage).
 
 
