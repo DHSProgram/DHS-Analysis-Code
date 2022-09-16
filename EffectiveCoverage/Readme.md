@@ -50,6 +50,7 @@ along with confidence intervals using the delta method as described in MR31 and 
 For this do file to run correctly the modified datasets created by the previous three do files should be saved in separate folders for each country, named using the two letter country code. For example, all Haiti datasets should be saved in a folder “HT”.
 
 The output of this do file is one dataset per country ending in “_results_modified.dta” with the following columns:
+|Name|Description|
 |---|---|
 |Country| Two letter country code| 
 |Outcome |ANC or SC|
@@ -57,6 +58,7 @@ The output of this do file is one dataset per country ending in “_results_modi
 |Model |Within each outcome/version combination, this variable will indicate that the estimates are either of one of the the effective coverage components (indicated by “source”) or a step in the effective coverage cascade (indicated by 1x2, 1x2x3, etc).|
 
 For example, within ANC version 2, source 1 is the crude coverage estimate, source 2 is the service readiness estimate, source 3 is the intervention coverage estimate, source 4 is the process quality estimate. 1x2 is the input-adjusted coverage estimate, 1x2x3 is the intervention coverage estimate, and 1x2x3x4 is the quality-adjusted coverage estimate.|
+|Name|Description|
 |---|---|
 |P |Estimate|
 |L_adj |lower bound of the adjusted asymmetric 95% confidence interval|
@@ -76,6 +78,7 @@ This do file is a slight modification of the previous do file, and runs on the s
 For this do file to run correctly the modified datasets created by the previous three do files should be saved in separate folders for each country, named using the two letter country code. For example, all Haiti datasets should be saved in a folder “HT”.
 
 The output of this do file is one dataset per country ending in “_results_modified.dta” with similar columns as described in the previous do file. Of particular interest are:
+|Name|Description|
 |---|---|
 |Country| Two letter country code| 
 |ANC_SC |ANC or SC|
@@ -86,6 +89,7 @@ The output of this do file is one dataset per country ending in “_results_modi
 |model |nwithin each outcome/version combination, this variable will indicate that the estimates are either of one of the the effective coverage components (indicated by “source”) or a step in the effective coverage cascade (indicated by 1x2, 1x2x3, etc).| 
 
 *For example, within ANC version 2, source 1 is the crude coverage estimate, source 2 is the service readiness estimate, source 3 is the intervention coverage estimate, source 4 is the process quality estimate. 1x2 is the input-adjusted coverage estimate, 1x2x3 is the intervention coverage estimate, and 1x2x3x4 is the quality-adjusted coverage estimate.|
+|Name|Description|
 |---|---|
 |type |string variable indicating national level estimate or regional estimate|
 |P |estimate|
