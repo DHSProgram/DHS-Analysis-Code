@@ -16,23 +16,23 @@ This do file creates the service readiness variables using SPA facility inventor
 This do file creates the process quality variables using SPA ANC and sick child observation files and saves them in a new dataset with suffix “coded.dta”.
 
 ************************************************************************************
-IMPORTANT
+***IMPORTANT***
 
 In the two do files above, all variables created as a component of the effective coverage cascade are saved with the following naming convention:
 
-*service area code_effective coverage component code_approach code*
+service area code_effective coverage component code_approach code
 
-***Service area codes***		
+#### Service area codes		
 anc	= antenatal care		
 sc	= sick child care		
 				
-***Effective coverage component codes***
+#### Effective coverage component codes
 c	= coverage
 r	= service readiness
 i	= intervention coverage
 q	= process quality
 
-***Approach codes***
+#### Approach codes
 1	    = Used in approach 1
 2	    = Used in approach 2
 3	    = Used in approach 3
