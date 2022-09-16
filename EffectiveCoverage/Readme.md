@@ -55,8 +55,7 @@ The output of this do file is one dataset per country ending in “_results_modi
 |Country| Two letter country code| 
 |Outcome |ANC or SC|
 |Version |Equivalent to “approach”. Should be 1, 2, or 3|
-|Model |Within each outcome/version combination, this variable will indicate that the estimates are either of one of the the effective coverage components (indicated by “source”) or a step in the effective coverage cascade (indicated by 1x2, 1x2x3, etc).
-For example, within ANC version 2, source 1 is the crude coverage estimate, source 2 is the service readiness estimate, source 3 is the intervention coverage estimate, source 4 is the process quality estimate. 1x2 is the input-adjusted coverage estimate, 1x2x3 is the intervention coverage estimate, and 1x2x3x4 is the quality-adjusted coverage estimate.|
+|Model |Within each outcome/version combination, this variable will indicate that the estimates are either of one of the the effective coverage components (indicated by “source”) or a step in the effective coverage cascade (indicated by 1x2, 1x2x3, etc). For example, within ANC version 2, source 1 is the crude coverage estimate, source 2 is the service readiness estimate, source 3 is the intervention coverage estimate, source 4 is the process quality estimate. 1x2 is the input-adjusted coverage estimate, 1x2x3 is the intervention coverage estimate, and 1x2x3x4 is the quality-adjusted coverage estimate.|
 |P |Estimate|
 |L_adj |lower bound of the adjusted asymmetric 95% confidence interval|
 |U_adj  |upper bound of the adjusted asymmetric 95% confidence interval|
@@ -83,8 +82,7 @@ The output of this do file is one dataset per country ending in “_results_modi
 |factype |facility type|
 |res_wealth |All if overall population, v025=1 indicates urban population, v025=2 indicates rural population, v190=1 indicates population in wealth quintile 1, and so on.|
 |adjusted | indicates if national estimate is adjusted by region
-|model |nwithin each outcome/version combination, this variable will indicate that the estimates are either of one of the the effective coverage components (indicated by “source”) or a step in the effective coverage cascade (indicated by 1x2, 1x2x3, etc).
-For example, within ANC version 2, source 1 is the crude coverage estimate, source 2 is the service readiness estimate, source 3 is the intervention coverage estimate, source 4 is the process quality estimate. 1x2 is the input-adjusted coverage estimate, 1x2x3 is the intervention coverage estimate, and 1x2x3x4 is the quality-adjusted coverage estimate.|
+|model |nwithin each outcome/version combination, this variable will indicate that the estimates are either of one of the the effective coverage components (indicated by “source”) or a step in the effective coverage cascade (indicated by 1x2, 1x2x3, etc). For example, within ANC version 2, source 1 is the crude coverage estimate, source 2 is the service readiness estimate, source 3 is the intervention coverage estimate, source 4 is the process quality estimate. 1x2 is the input-adjusted coverage estimate, 1x2x3 is the intervention coverage estimate, and 1x2x3x4 is the quality-adjusted coverage estimate.|
 |type |string variable indicating national level estimate or regional estimate|
 |P |estimate|
 |L_adj|lower bound of the adjusted asymmetric 95% confidence interval|
