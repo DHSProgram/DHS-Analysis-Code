@@ -27,17 +27,17 @@ anc	= antenatal care <br/>
 sc	= sick child care		
 				
 #### Effective coverage component codes
-c	= coverage
-r	= service readiness
-i	= intervention coverage
+c	= coverage  <br/>
+r	= service readiness  <br/>
+i	= intervention coverage  <br/>
 q	= process quality
 
 #### Approach codes
-1	    = Used in approach 1
-2	    = Used in approach 2
-3	    = Used in approach 3
-23	= Used in approaches 2 and 3
-123 = Used in all approaches
+1	    = Used in approach 1  <br/>
+2	    = Used in approach 2  <br/>
+3	    = Used in approach 3  <br/>
+23	= Used in approaches 2 and 3  <br/>
+123 = Used in all approaches  <br/>
 
 For example, the *anc_r_23* variable is the ANC readiness measure used in approaches 2 and 3 in MR31.
 ************************************************************************************
@@ -45,7 +45,7 @@ For example, the *anc_r_23* variable is the ANC readiness measure used in approa
 
 ### 4. EC_coefficient_nlcom.do
 This do file puts all the components of the effective coverage cascade together to calculate the effective coverage estimates 
-along with confidence intervals using the delta method as described in MR31 and Sauer et al (2020).
+along with confidence intervals using the delta method as described in MR31 and Sauer et al (2020).  
 
 For this do file to run correctly the modified datasets created by the previous three do files should be saved in separate folders for each country, named using the two letter country code. For example, all Haiti datasets should be saved in a folder “HT”.
 
