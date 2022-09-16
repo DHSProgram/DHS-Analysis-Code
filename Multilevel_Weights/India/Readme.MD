@@ -1,6 +1,5 @@
 
-Purpose: approximation of level-weight of the India NFHS-4
-Date: Jan 24, 2022
+# Purpose: approximation of level-weight of the India NFHS-4
 
 The purpose of this section is to support users regarding the approximation of level-weight of the India NFHS-4. 
 The approximation follows the methods explained in the MR27. 
