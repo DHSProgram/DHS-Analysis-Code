@@ -66,4 +66,4 @@ The regression program demonstrates how to perform a logistic regression with DH
 This program will show an example of an analysis to answer a research question from start to finish. This uses code from the previous sections: Recoding, Survey design, Exporting tabulations to excel, and Regression. 
 
 ## Special or advanced topics
-This folder contains several useful programs for advanced analysis of DHS data. This includes: multilevel weights, household structure, coding of special indicators, and more.  
+This folder contains several useful programs for advanced analysis of DHS data. This includes: multilevel weights, survival analysis, coding of special indicators, and more to come.  
