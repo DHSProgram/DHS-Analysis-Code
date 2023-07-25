@@ -5,9 +5,9 @@ The section will contain code for construction of special indicators and measure
 
 In no particular order, the following code is available:
 
-### HouseholdStructure.do
+### HouseholdStructure
 
-Constructs household structure variable using the PR file
+Constructs household structure variable using the PR file. Stata and R code available. 
 
 ### SexRatio.do
 
