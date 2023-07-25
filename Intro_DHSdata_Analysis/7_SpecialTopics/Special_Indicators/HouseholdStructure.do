@@ -1,18 +1,18 @@
-/*******************************************************************************************************************************
+/*********************************************************************************
 Program: 				HouseholdStucture.do
 Purpose: 				Construct household structure variable
 Author: 				Tom Pullum
-Date last modified:		Jan 17, 2023 by Tom Pullum
-*******************************************************************************************************************************/
+Date last modified:		July 25, 2023 by Shireen Assaf
+*********************************************************************************/
 
-* using Philippines 2022 DHS survey as an example
-use "PHPR81FL.DTA", clear 
+* using PR model dataset
+use "ZZPR62FL.DTA", clear 
 
 * Criteria for household typology
 * household head is male (hv101=1, hv104=1)
 * household head is female (hv101=1, hv104=2)
-* no spouse present (no one in hh with hv101=2
-* at least one unmarried child present (hv101=3,hv105<=17, hv115=0)
+* no spouse present (no one in hh with hv101=2)
+* at least one unmarried child present (hv101=3,hv105<=17, hv115=0 | hv115==.)
 
 gen hhhead_male  =0
 gen hhhead_female=0
@@ -22,7 +22,7 @@ gen child=0
 replace hhhead_male  =1 if hv101==1 & hv104==1
 replace hhhead_female=1 if hv101==1 & hv104==2
 replace spouse=1        if hv101==2
-replace child=1         if hv101==3 & hv105<=17 & hv115==0
+replace child=1         if hv101==3 & hv105<=17 & (hv115==0 | hv115==.)
 
 egen nhhhead_male  =total(hhhead_male),   by(hv024 hv001 hv002) 
 egen nhhhead_female=total(hhhead_female), by(hv024 hv001 hv002) 
@@ -42,5 +42,10 @@ replace hhtype=9 if hhtype==.
 
 label define hhtype 1 "Male head with spouse and children" 2 "Male head with spouse, no children" 3 "Male head, no spouse, and children" 4 "Male head, no spouse, no children" 5 "Female head with spouse and children" 6 "Female head with spouse, no children" 7 "Female head, no spouse, and children" 8 "Female head, no spouse, no children" 9 "Other"
 label values hhtype hhtype
+label var hhtype "Household structure"
 
-tab hhtype if hv101==1 [iweight=hv005/1000000]
+*unweighted percentages
+tab hhtype
+
+*weighted percentahes
+tab hhtype [iweight=hv005/1000000]
