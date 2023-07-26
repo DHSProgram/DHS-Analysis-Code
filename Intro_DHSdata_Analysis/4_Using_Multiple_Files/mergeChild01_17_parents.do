@@ -1,9 +1,12 @@
-* do e:\DHS\programs\merging\merge_children_mothers_fathers_do_14Feb2023.txt
-
-/*
- Program to merge children 0-17 in the PR file with ALL the data about their
+/*****************************************************************************************************
+Program: 			mergeChild01_17_parents.do
+Purpose: 			Program to merge children 0-17 in the PR file with ALL the data about their
    mothers and fathers and ALL the data in the BR file
+Author:				Tom Pullum
+Date last modified: Feb 14, 2023 by Tom Pullum
+*****************************************************************************************************/
 
+/* Description: 
 Here are the category labels for "Mother's status", with more explanation:
 0 "Dead"                   hv111==0
 1 "Not in HH"              (hv111>0 & hv112==0) | hv112==. 
@@ -272,18 +275,18 @@ end
 ******************************************************************************
 * Execution begins here
 
-* Specify workspace
-cd e:\DHS\DHS_data\scratch
+* Specify your workspace, change to your own path
+*cd "C:\.."
 
-* Specify path to the data
-scalar spath="C:\Users\26216\ICF\Analysis - Shared Resources\Data\DHSdata"
+* Specify path to the data, change to your own
+scalar spath="C:\Data"
 
 * specify the first six characters of the PR, IR, MR, and BR file names.
 * Note that characters 5-6 may not be the same in all four files.
-scalar sfn_PR="RWPR61"
-scalar sfn_IR="RWIR61"
-scalar sfn_MR="RWMR61"
-scalar sfn_BR="RWBR61"
+scalar sfn_PR="ZZPR62"
+scalar sfn_IR="ZZIR62"
+scalar sfn_MR="ZZMR61"
+scalar sfn_BR="ZZBR62"
 
 make_workfiles
 prepare_workfiles_for_merges
@@ -292,10 +295,17 @@ merge_with_IR
 merge_with_MR
 merge_with_BR
 
-
-
-
-
-
-
+*erase all temporary files
+erase BR.dta
+erase BRtemp.dta
+erase IR.dta
+erase IRtemp.dta
+erase MR.dta
+erase MRtemp.dta
+erase PR.dta
+erase PRtemp_ch.dta
+erase PRtemp_ch_mo.dta
+erase PRtemp_ch_mo_fa.dta
+erase PRtemp_fa.dta
+erase PRtemp_mo.dta
 

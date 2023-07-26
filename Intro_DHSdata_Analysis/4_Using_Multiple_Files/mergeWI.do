@@ -4,7 +4,7 @@ Purpose: 			example shown to merge WR to IR file. Notes given on how to merge wi
 Author:				Shireen Assaf
 Date last modified: May 27, 2021 by Shireen Assaf 
 
-Notes:				Older datasets can sometimes not contain the wealth index. To include the wealth index a WI file was created for these surveys. Will use the Bangladesh 1999-2000 survey as an example since model datasets do not have an WI file.
+Notes:				Older datasets sometimes do not contain the wealth index. To include the wealth index, a WI file was created for these surveys. Will use the Bangladesh 1999-2000 survey as an example since model datasets do not have an WI file.
 					
 					Notes are given at the end of the file on how to perform other merges of WI file with other file types. 
 *****************************************************************************************************/
