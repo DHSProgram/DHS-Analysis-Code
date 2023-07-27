@@ -2,6 +2,8 @@
 
 These files allow users to recreate the Collective Fertility and Gender Norms analysis from [DHS Analytical Study 82](https://www.dhsprogram.com/publications/publication-as82-analytical-studies.cfm?csSearch=574722_1) 
 
+The analysis in the report was performed on three DHS surveys: Nigeria 2018, Nepal 2016, and Zambia 2018.
+
 There are four do files that will recreate the analysis. These do files should be run in the order presented.
 
 ## The do files are:

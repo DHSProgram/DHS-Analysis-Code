@@ -9,6 +9,14 @@ Date last modified: Oct 20, 2021 by Shireen Assaf
 				
 *****************************************************************************************************/
 
+
+* IR Files
+global irdata "NGIR7BFL NPIR7HFL ZMIR71FL"
+
+* MR Files
+global mrdata "NGMR7AFL NPMR7HFL ZMMR71FL"
+
+
 *IR files
 foreach c in $irdata {
 use "$Datafilepath/`c'.dta", clear
