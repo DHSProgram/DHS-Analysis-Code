@@ -4,7 +4,7 @@ This repository contains code that users may find useful when analyzing DHS surv
 
 ## Introduction to DHS Data Analysis
 
-The Intro_DHSdata_Analysis section of this repository contains the programs for beginning your analysis with DHS data. Programs are available in R and Stata. 
+The [Intro_DHSdata_Analysis section](https://github.com/DHSProgram/DHS-Analysis-Code/tree/main/Intro_DHSdata_Analysis) of this repository contains the programs for beginning your analysis with DHS data. Programs are available in R and Stata. 
 Please check the readme file for this folder for more details. 
 
 ## Code used in analysis reports
