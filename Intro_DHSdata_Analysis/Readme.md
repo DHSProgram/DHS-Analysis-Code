@@ -40,7 +40,7 @@ For this do file you will need a strata variable.
 In recent DHS surveys, the strata variable is v022, hv022, mv002.  If you are not using a recent DHS survey, please check the Survey_strata.do file which will compute the strata variable for any DHS survey.  
 The Survey_strata.do file does not check the strata for MIS, AIS, and interim surveys. For these surveys please refer to the final report to check what stratification was used. 
 
-## Exporting tabulations to excel
+## Exporting tabulations
 This program will show how to tabulate and export your results. 
 
 For Stata, the program will demonstrate examples using the tabout command and the putexcel commands. 
