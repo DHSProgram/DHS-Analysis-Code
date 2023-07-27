@@ -1,7 +1,7 @@
 /*****************************************************************************************************
-Program: 			urbpov_code.do
-Purpose: 			Code urban poverty measure used in AS81
-Data inputs: 		HR file 
+Program: 		urbpov_code.do
+Purpose: 		Code urban poverty measure used in AS81
+Data inputs:	 	HR file 
 Author:				Shireen Assaf			
 Date last modified: July 28, 2022 by Shireen Assaf 
 
@@ -14,11 +14,14 @@ global hrdata "CDHR61FL ETHR71FL KEHR72FL NGHR7BFL TZHR7BFL UGHR7BFL"
 foreach c in $hrdata {
 use "`c'.dta", clear
 
+*saving the filename for each survey
 gen filename= lower(substr("`c'",1,6)) 
+
+*getting country two letter acronym. 
 local cn=substr("`c'",1,2)
 
 *****************
-*WASH code (wanter and sanitation) is found in the DHS Code Library: https://github.com/DHSProgram/DHS-Indicators-Stata/tree/master/Chap02_PH
+*WASH code (water and sanitation) is found in the DHS Code Library: https://github.com/DHSProgram/DHS-Indicators-Stata/tree/master/Chap02_PH
 
 *toilet
 do "PH_SANI.do"
@@ -99,7 +102,7 @@ gen v001 =hv001
 gen v002 =hv002
 
 *optional, keep only variables you need
-*keep v001 v002 hv000-hv027 hv012 hv013 ph* saniimprove waterimprove floor wall roof housedur crowd crowded sumhh urbanpo* filename
+keep v001 v002 hv000-hv027 hv012 hv013 ph* saniimprove waterimprove floor wall roof housedur crowd crowded sumhh urbanpo* filename
 
 save "`cn'HRcoded.dta", replace
   }
