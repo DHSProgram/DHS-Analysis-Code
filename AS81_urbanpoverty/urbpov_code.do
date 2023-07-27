@@ -106,9 +106,12 @@ save "`cn'HRcoded.dta", replace
   
   
 * The next step is to merge the HRcoded file above with a KR or PR file
-* This is performed by a many to one merge as follows:
+* This is performed by a many to one merge with a coded KR file as follows:
 
-*use cnKRcoded.dta, clear
-*merge m:1 v001 v002 using "cnHRcoded.dta"
+*use `cn'KRcoded.dta, clear
+*merge m:1 v001 v002 using "`cn'HRcoded.dta"
+*save "`cn'HRKRmerged.dta", replace
 
+
+* You can check the merge_loop code in the Intro_DHSdata_Analysis\4_Using_Multiple_Files section of this repository for merge code that loops through several countries. 
   
