@@ -26,7 +26,7 @@ The code also shows how to append the merged IR and MR files to a dataset that c
 ### mergeHW
 Older datasets may not contain the anthropometry variables according to the WHO reference. 
 HW files are created with the WHO reference nutrition indicators that can be merged to datasets.
-Here we show an example using the Bangladesh 1999-2000 survey since there is no HW file for model datasets.
+Here we show an example using the Bangladesh 1999-2000 and the 2004 surveys since there is no HW file for model datasets.
 
 ### mergeWI 
 Older datasets sometimes do not contain the wealth index. 
