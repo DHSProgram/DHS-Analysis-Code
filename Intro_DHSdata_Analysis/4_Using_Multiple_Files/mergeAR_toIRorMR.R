@@ -8,7 +8,11 @@
 # 					    The using file is the AR file.
 # 					    There is an option at the end of the do file to append the IR and MR merged files if needed for the analysis. 
 # *****************************************************************************************************
-# Merging AR and IR file
+
+library(haven)
+library(dplyr)
+library(here)
+here() # check your path, this is where you should have your saved datafiles
 
 # Open your using data file
 ARdata <-  read_dta(here("Intro_DHSdata_Analysis","ZZAR61FL.dta"))

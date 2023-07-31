@@ -6,6 +6,11 @@
 # Note:				This is an example of a many to one merge, since there are many women in one household
 # *****************************************************************************************************
 
+library(haven)
+library(dplyr)
+library(here)
+here() # check your path, this is where you should have your saved datafiles
+
 # open HR dataset 
 HRdata <-  read_dta(here("Intro_DHSdata_Analysis","ZZHR62FL.dta"))
 
