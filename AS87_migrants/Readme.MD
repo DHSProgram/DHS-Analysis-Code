@@ -3,7 +3,7 @@
 
 ## Coding variables
 The migrants_codevars.do file can be used to construct the migration measure used in the [DHS Analytical Study #87: Internal Adult Women Migrants’ Use and Access to 
-Health Services in 15 DHS Countries](add link when available). It also includes the outcomes and all the other vairables used in the analysis.
+Health Services in 15 DHS Countries](https://dhsprogram.com/publications/publication-as87-analytical-studies.cfm?csSearch=1076561_1). It also includes the outcomes and all the other vairables used in the analysis.
 
 The resulting IR coded file for each survey was used to examine levels, trends, characteristics of migrants and the association of migrants with the four outcomes. 
 
