@@ -35,8 +35,9 @@ The Bangladesh 1999-2000 survey as an example since there is no WI file for mode
 The code will show how to merge the WI with an IR file and notes on how to merge with MR or PR/HR files. 
 
 ### mergeGPS
-This shows how to merge an IR file with the GC (points) file in STATA
-The Nigeria 2015 MIS data is used for this example, but the code should work for any DHS survey
+This shows how to merge an IR file with the GC (points) file in STATA.
+The Nigeria 2018 DHS data is used for this example, but the code should work for any DHS survey.
+There are two sections to this code, one will merge the cluster GPS locations and the other will merge the region GPS locations and create a map for an indicator of interest.
 
 ### mergeHHhead_toIR
 Construct a file that attaches the characteristics of the household head to each eligible woman in the household.
@@ -60,4 +61,4 @@ The Nigeria 2013 and 2018 DHS are used as an example for one country and code is
 
 
 ##### author: Shireen Assaf
-##### last updated: July 26, 2023 by Shireen Assaf
+##### last updated: Aug 01, 2023 by Shireen Assaf
