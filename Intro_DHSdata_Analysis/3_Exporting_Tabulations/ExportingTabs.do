@@ -2,7 +2,7 @@
 	Purpose: Exporting tabulations to excel
 	Data input: The model dataset women's file (IR file)
 	Author: Shireen Assaf
-	Date Last Modified: Feb 1, 2023 by Shireen Assaf
+	Date Last Modified: Aug 4, 2023 by Shireen Assaf to add dtable option for Stata 18 users
 
 Notes/Instructions:
 
@@ -33,20 +33,33 @@ label var modfp "currently use a modern method"
 * install tabout program if it is not installed already
 ssc install tabout
 
-* One way tabulation (tabulate one variable at a time)
+**** One way tabulation (tabulate one variable at a time) ****
+
 * note the use of "oneway" since this is a one way tabulations
 * the svy command and wt are also included
 tabout v106 v025 v024 using table1.xls, c(cell) oneway svy nwt(wt) per pop replace
 
-* two-way tabulation: tabulate one variable with the outcome one at a time
+* If you have Stata 18, you can also use the dtable command for one way tabulations.
+* See below for exmaple code that would give the same output as the oneway tabout above.
+dtable i.v106 i.v025 i.v024, svy nformat(%9.1f mean) nosample column(summary(N / %)) title(Table 1) export(table1b.docx)
+
+* you can also export as an excel file by using export(Table.xlsx) in dtable code above
+
+* In both the tabout and dtable oneway tabulations above, you don't need to use svy and can just apply weights using [iw=wt] since you are not reporting SE or confidence intervals. However, using svy will also be correct. 
+
+
+**** Two-way tabulation: tabulate one variable with the outcome one at a time ****
+
 * example: tabulate modern contraceptive methhod use by education, residence, and region
 * the last variale on the list should be the outcome variable 
 * note that we use c(row ci) to indicate we want row percentages and the confidence interval
 * there is also the stats(chi2) option to produce the chi-square test results
 tabout v106 v025 v024 modfp using table2.xls if v502==1, c(row ci) stats(chi2) svy nwt(wt) per pop replace 
 
+******************************************************************************
 
 *** Using putexcel command ***
+
 * using tabout can require a lot of copy and pasting to produce a table for a report or paper.
 * using putexcel can help produce a table that is closer to what would appear as a final table.
 * the code below describes how putexcel can be used for creating a crosstabulation of one indicator with several background variables. 
@@ -165,4 +178,4 @@ foreach y in tot v106 v025 v024 {
 	local prow = `row' -1
 	}  
   
-
+******************************************************************************
