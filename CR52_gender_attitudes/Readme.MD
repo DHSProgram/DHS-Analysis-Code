@@ -1,7 +1,7 @@
 # Readme CR52: Trends in Men's Gender Attitudes
 
 ## Coding variables
-The codevars.do file can be used to construct the various measures used in [DHS Comparative Report #52:Trends in Men's Gender Attitudes: Progress, Backsliding, or Stagnation?] (https://dhsprogram.com/publications/publication-cr52-comparative-reports.cfm?csSearch=1097642_1). 
+The codevars.do file can be used to construct the various measures used in [DHS Comparative Report #52:Trends in Men's Gender Attitudes: Progress, Backsliding, or Stagnation?](https://dhsprogram.com/publications/publication-cr52-comparative-reports.cfm?csSearch=1097642_1). 
 
 The resulting IR coded file for each included survey was used to examine levels and trends for men's responses questions related to five indicators reflecting their gendered attitudes, preferences and behaviors. Men's responses were then compared to women's responses to the same items (with one exception) for a selection of countries with at least three surveys conducted since 2000.
 
