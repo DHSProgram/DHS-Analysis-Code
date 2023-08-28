@@ -12,10 +12,12 @@ Please check the readme file for this folder for more details.
 When possible code that was used for DHS analysis reports can be found in this repository. 
 The code will be stored in a folder with the report publication ID (for instance AS81 for the urban poverty study) or by topic (for instance effective coverage).
 
+The DHS Program analysis reports can fall into the following main categories: AS - Analysis Study, CR - Comparative Report, MR - Methodological Report, WP - Working Paper .
+
 You can search for all DHS publications and reports on the [DHS publication search page](https://www.dhsprogram.com/search/)
 
 ## User Forum
 
-If you have questions on the analysis of DHS data, please post your them on the [DHS User Forum](https://userforum.dhsprogram.com/).
+If you have questions on the analysis of DHS data, please post them on the [DHS User Forum](https://userforum.dhsprogram.com/).
 
 
