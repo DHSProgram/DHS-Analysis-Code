@@ -1,7 +1,7 @@
 
 # Readme AS 88: Birth Intervals and Child Mortality Study
 
-This code is used to produce analysis for the [DHS Analytical Study #88: The Effect of Fertility Behavior on Child Survival: Evidence from the Demographic and Health Surveys, 2012–2022](add link when ready). The study examines mortality risks associated with short birth to conception intervals, maternal age at birth, and birth order. 
+This code is used to produce analysis for the [DHS Analytical Study #88: The Effect of Fertility Behavior on Child Survival: Evidence from the Demographic and Health Surveys, 2012–2022](https://www.dhsprogram.com/publications/publication-as88-analytical-studies.cfm?csSearch=1125639_1). The study examines mortality risks associated with short birth to conception intervals, maternal age at birth, and birth order. 
 
 
 ## Files:
