@@ -1,0 +1,497 @@
+* do e:\DHS\programs\unified_rates\adult_mm_rates_do_16Mar2023.txt
+
+/*
+
+This is a concise program to calculate adult and maternal mortality rates
+Initially prepared for a Mauritania complex indicators workshop but can be
+  used and distributed more widely. It produces all the standard estimates
+  in the final report chapter on adult and maternal mortality, and more,
+  except that it does not produce confidence intervals.
+
+The executable lines begin after the multiple lines of asterisks
+
+Mrate_men:   adult mortality rate for men 15-49
+Mrate_women: adult mortality rate for women 15-49
+PRrate:      pregnancy-related mortality rate
+PRratio:     pregnancy-related mortality ratio
+MMrate:      maternal mortality rate
+MMratio:     maternal mortality ratio
+
+Tom Pullum, tom.pullum@icf.com, November 2022 - March 2023 but based on
+  earlier programs
+
+*/
+**********************************************************************
+
+program define calculate_rates
+
+local lpath=spath
+local lcid=scid
+local lpv=spv
+
+use mmterms.dta, clear
+sort age
+merge age using MRage.dta
+tab _merge
+drop _merge
+sort age
+merge age using IRage.dta
+tab _merge
+drop _merge
+sort age
+merge age using GFR_births.dta
+tab _merge
+drop _merge
+sort age
+merge age using GFR_exposure.dta
+tab _merge
+drop _merge
+sort age
+
+
+label define age 1 "15-19" 2 "20-24" 3 "25-29" 4 "30-34" 5 "35-39" 6 "40-44" 7 "45-49" 8 "15-49"
+label values age age
+
+* Age-specific rates
+gen Mrate_women=1000*died_women/yexp_women
+gen Mrate_men  =1000*died_men/yexp_men
+gen PRrate=1000*died_PR/yexp_women
+gen MMrate=1000*died_MM/yexp_women
+
+* The percentage of women's deaths that are PR or MM
+gen PR_pct=100*died_PR/died_women
+gen MM_pct=100*died_MM/died_women
+
+* Terms for 35q15 for women and men
+gen q_women=5*died_women/(yexp_women+2.5*died_women)
+gen q_men  =5*died_men/(yexp_men+2.5*died_men)
+
+* Fertility rates for GFR
+gen asfr=1000*GFR_births/GFR_exposure
+
+
+save mmrates_by_age.dta, replace
+
+* Terms for the age-adjusted totals (and the TFR)
+gen Mrate_women_adj=women_wtd*Mrate_women
+gen Mrate_men_adj  =  men_wtd*Mrate_men
+gen PRrate_adj     =women_wtd*PRrate
+gen MMrate_adj     =women_wtd*MMrate
+gen GFR_adj        =women_wtd*asfr
+
+* Terms for 35q15 for women and men
+gen qterm_women=log(1-q_women)
+gen qterm_men=log(1-q_men)
+keep *men_wtd died* yexp* *adj qterm* GFR* asfr
+
+* Collapse to get totals
+collapse (sum) *men_wtd died* yexp* *adj qterm* GFR_births GFR_exposure asfr
+
+* Unadjusted rates
+gen Mrate_women=1000*died_women/yexp_women
+gen Mrate_men  =1000*died_men/yexp_men
+gen PRrate     =1000*died_PR/yexp_women
+gen MMrate     =1000*died_MM/yexp_women
+gen GFR        =1000*GFR_births/GFR_exposure
+gen TFR        =5*asfr/1000
+replace asfr=.
+
+
+replace qterm_women=1-exp(qterm_women)
+replace qterm_men=1-exp(qterm_men)
+
+rename qterm* q*
+
+* The percentage of women's deaths that are PR or MM
+gen PR_pct=100*died_PR/died_women
+gen MM_pct=100*died_MM/died_women
+
+* The PR and MM ratios; include factors to get deaths per 100,000 births
+gen PRratio=100000*PRrate_adj/GFR_adj
+gen MMratio=100000*MMrate_adj/GFR_adj
+
+* Risk of maternal death
+gen PRrisk=1-(1-PRratio/100000)^TFR
+gen MMrisk=1-(1-MMratio/100000)^TFR
+
+gen age=100
+append using mmrates_by_age.dta
+sort age
+label define age 100 "15-49", modify
+label values age age
+replace GFR_adj=. if age<100
+
+format *died* *pct *rate* %6.2f
+format q* %6.4f
+format *exp* %10.2f
+
+* adult death rates for women and men
+list age died_women yexp_women Mrate_women women_wtd Mrate_women_adj, table clean noobs abbrev(15)
+
+list age died_men yexp_men Mrate_men men_wtd Mrate_men_adj , table clean noobs abbrev(15)
+
+* 35q15, GFR, and TFR 
+list age q_women q_men GFR_births GFR_exposure asfr GFR_adj TFR, table clean noobs abbrev(15)
+
+* pregnancy-related mortality
+list age PR_pct died_PR yexp_women PRrate PRrate_adj PRratio PRrisk, table clean noobs abbrev(15)
+
+* maternal mortality, if mm16 is included in the data
+if smm16_absent==0 {
+list age MM_pct died_MM yexp_women MMrate MMrate_adj MMratio MMrisk, table clean noobs abbrev(15)
+}
+
+save mmrates_summary.dta, replace
+
+end
+
+**********************************************************************
+
+program define get_GFR_exposure
+
+* Exposure comes from the IR file
+
+local lpath=spath
+local lcid=scid
+local lpv=spv
+
+use "`lpath'\\`lcid'IR`lpv'FL.dta", clear
+
+keep v001 v002 v003 v005 v008 v011 
+gen wt=v005/1000000
+
+* construct the intervals 
+
+gen ucmc=v008-Umbi
+gen lcmc=v008-Lmbi
+
+* Calculate lcmc_n and ucmc_n, the lower and upper cmc for five-year age interval n
+forvalues ln=1/7 {
+gen lcmc_`ln'=v011+180+60*(`ln'-1)
+gen ucmc_`ln'=lcmc_`ln'+59
+}
+ 
+* For each woman, calculate mexp_n, the months of exposure to age interval n within the window of time
+
+forvalues ln=1/7 {
+
+gen mexp_`ln'=0
+
+replace mexp_`ln'= min(ucmc, ucmc_`ln') - max(lcmc, lcmc_`ln') + 1 
+
+* replace any negative exposures by 0
+replace mexp_`ln'=0 if mexp_`ln'<0
+
+* Convert from months to years of exposure and include wt
+gen yexp_`ln'=wt*mexp_`ln'/12
+}
+
+collapse (sum) yexp_*
+gen dummy=1
+reshape long yexp_, i(dummy) j(age)
+rename *_ * 
+rename yexp GFR_exposure
+drop dummy
+
+sort age
+save GFR_exposure.dta, replace
+
+end
+
+**********************************************************************
+
+program define get_GFR_births
+
+* Births come from the BR file
+
+local lpath=spath
+local lcid=scid
+local lpv=spv
+
+use "`lpath'\\`lcid'BR`lpv'FL.dta", clear
+
+keep v001 v002 v003 v005 v008 v011 b3
+gen wt=v005/1000000
+
+* construct the intervals 
+
+gen ucmc=v008-Umbi
+gen lcmc=v008-Lmbi
+
+* Calculate lcmc_n and ucmc_n, the lower and upper cmc for five-year age interval n
+forvalues ln=1/7 {
+gen lcmc_`ln'=v011+180+60*(`ln'-1)
+gen ucmc_`ln'=lcmc_`ln'+59
+}
+ 
+* For each woman, calculate the number of births in age interval n within the window of time
+* Include wt
+
+forvalues ln=1/7 {
+gen births_`ln'=0
+replace births_`ln'=births_`ln'+1 if b3>=max(lcmc, lcmc_`ln') & b3<=min(ucmc, ucmc_`ln')
+replace births_`ln'=wt*births_`ln'
+}
+
+collapse (sum) births_*
+gen dummy=1
+reshape long births_, i(dummy) j(age)
+rename *_ * 
+rename births GFR_births
+drop dummy
+
+sort age
+save GFR_births.dta, replace
+
+end
+
+**********************************************************************
+
+program define prepare_mm_file
+
+local lpath=spath
+local lcid=scid
+local lpv=spv
+
+use "`lpath'\\`lcid'IR`lpv'FL.dta", clear
+
+* Describe the mm vars; limit to subscript 01
+describe mm*_01
+
+* Earlier surveys do not include mm16. Construct and set to 0 if not included
+
+capture confirm numeric variable mm16_01, exact 
+
+scalar smm16_absent=0
+if _rc>0 {
+
+scalar smm16_absent=1
+  forvalues li=1/20 {
+  gen mm16_`li'=0
+  }
+}
+
+* mmvars (including na):       idx and 1-16
+* mmvars in the data (not na): idx 1 2 3 4 6 7 8 9 12 16
+* mmvars to keep:                  1 2 3 4 6 7 8 9 12 16
+* mmvars that have value labels:   1 2 3   6 7   9 12 16
+
+keep v001 v002 v003 v005 v008 mm1_* mm2_* mm3_* mm4_* mm6_* mm7_* mm8_* mm9_* mm12_* mm16_*
+gen wt=v005/1000000
+
+* Must change subscript 01 to 1, etc., for reshape
+rename mm*_0* mm*_*
+reshape long mm1_ mm2_ mm3_ mm4_ mm6_ mm7_ mm8_ mm9_ mm12_ mm16_, i(v001 v002 v003) j(mmidx)
+rename *_ *
+
+* The reshape command produces many empty cases
+drop if mm1==.
+
+* Additional fix for the substitution of m16
+replace mm16=. if mm1~=2
+
+* Re-attach variable labels after reshape 
+label variable mm1 "Sex"
+label variable mm2 "Survival status"
+label variable mm3 "Current age"
+label variable mm4 "CMC birth"
+label variable mm6 "Years since died"
+label variable mm7 "Age at death"
+label variable mm8 "CMC of death"
+label variable mm9 "Death and pregnancy"
+label variable mm12 "Interval after delivery"
+label variable mm16 "Violence or accident"
+
+* Re-attach value labels after reshape
+local lnumbers 1 2 3 6 7 9 12 16
+foreach ln of local lnumbers {
+label values mm`ln' MM`ln'_01
+}
+
+* Drop the sibling if survival status is not known
+tab mm2, nolabel
+drop if mm2==8
+
+* Calculate lcmc and ucmc, the lower and upper cmc for the window of time
+* If a different window is wanted, just respecify ucmc and lcmc
+
+gen ucmc=v008-Umbi
+gen lcmc=v008-Lmbi
+
+* Calculate lcmc_n and ucmc_n, the lower and upper cmc for five-year age interval n
+* Calculate died_n=1 if died in age interval n and in the window of time, otherwise d_n=0 
+forvalues ln=1/7 {
+gen lcmc_`ln'=mm4+180+60*(`ln'-1)
+gen ucmc_`ln'=lcmc_`ln'+59
+gen died_`ln'=0
+replace died_`ln'=1 if mm8>=lcmc_`ln' & mm8<=ucmc_`ln' & mm8>=lcmc & mm8<=ucmc
+}
+ 
+* For each sibling, calculate mexp_n, the months of exposure to age interval n within the window of time
+
+forvalues ln=1/7 {
+
+gen mexp_`ln'=0
+
+* survived (mm8=.), or died after the age interval; note "+1"
+replace mexp_`ln'= min(ucmc, ucmc_`ln') - max(lcmc, lcmc_`ln') + 1  if mm8>ucmc_`ln'
+
+* died within the age interval; note "+1"
+replace mexp_`ln'= min(ucmc, ucmc_`ln', mm8) - max(lcmc, lcmc_`ln') +1 if died_`ln'==1
+
+* replace any negative exposures by 0 (e.g. died before the age interval)
+replace mexp_`ln'=0 if mexp_`ln'<0
+
+* Convert from months to years of exposure
+gen yexp_`ln'=mexp_`ln'/12
+
+}
+
+drop mexp_*
+
+forvalues ln=1/7 {
+
+gen   yexp_men_`ln'=0
+gen yexp_women_`ln'=0
+gen   died_men_`ln'=0
+gen died_women_`ln'=0
+gen    died_PR_`ln'=0
+gen    died_MM_`ln'=0
+
+replace   yexp_men_`ln'=wt*yexp_`ln' if mm1==1
+replace yexp_women_`ln'=wt*yexp_`ln' if mm1==2
+replace   died_men_`ln'=wt*died_`ln' if mm1==1
+replace died_women_`ln'=wt*died_`ln' if mm1==2
+
+replace died_PR_`ln'=wt if mm1==2 & died_`ln'==1 & mm9~=1 & mm9~=. & yexp_`ln'>0 & yexp_`ln'<.
+replace died_MM_`ln'=.
+  if smm16_absent==0 {
+  replace died_MM_`ln'=wt if mm1==2 & died_`ln'==1 & (mm9==3 | (mm9==2 & mm16==0) | (mm9==5 & mm16==0))
+  }
+}
+
+keep yexp_men_* yexp_women_* died_men_* died_women_* died_PR_* died_MM_*
+
+collapse (sum) *_1 *_2 *_3 *_4 *_5 *_6 *_7
+gen dummy=_n
+reshape long yexp_men_ yexp_women_ died_men_ died_women_ died_PR_ died_MM_, i(dummy) j(age)
+drop dummy
+rename *_ *
+sort age
+save mmterms.dta, replace
+
+end
+
+**********************************************************************
+
+program define get_agedist_women
+
+* Need the age distribution of men to standardize the adult mortality rate for men.
+
+local lpath=spath
+local lcid=scid
+local lpv=spv
+
+use "`lpath'\\`lcid'IR`lpv'FL.dta"
+rename v013 age
+
+keep if v012>=15 & v012<=49
+gen women_wtd=v005/1000000
+collapse (sum) women_wtd, by(age)
+
+* Convert to proportions
+quietly total women_wtd
+matrix B=e(b)
+scalar stot=B[1,1]
+replace women_wtd=women_wtd/stot
+
+list, table clean
+sort age
+save IRage.dta, replace
+
+end
+
+**********************************************************************
+
+program define get_agedist_men
+
+* Need the age distribution of men to standardize the adult mortality rate for men.
+* If there is no MR file, use the PR file and construct the equivalent of mv013.
+
+local lpath=spath
+local lcid=scid
+local lpv=spv
+
+* Use the MR file
+use "`lpath'\\`lcid'MR`lpv'FL.dta"
+rename mv013 age
+keep if mv012>=15 & mv012<=49
+gen men_wtd=mv005/1000000
+
+
+/* Use the PR file
+use "`lpath'\\`lcid'PR`lpv'FL.dta"
+keep if hv104==1 & hv103==1
+keep if hv105>=15 & hv105<=49
+gen age=-2+int(hv105/5)
+gen men_wtd=hv005/1000000
+*/
+
+collapse (sum) men_wtd, by(age)
+
+* Convert to proportions
+quietly total men_wtd
+matrix B=e(b)
+scalar stot=B[1,1]
+replace men_wtd=men_wtd/stot
+
+list, table clean
+sort age
+save MRage.dta, replace
+
+end
+
+**********************************************************************
+**********************************************************************
+**********************************************************************
+**********************************************************************
+**********************************************************************
+* Execution begins here
+
+* Specify workspace
+cd e:\DHS\DHS_data\scratch
+
+
+* Specify path to the data
+scalar spath="C:\Users\26216\ICF\Analysis - Shared Resources\Data\DHSdata"
+
+* Specify columns 1-2 and 5-6 of the IR file
+scalar scid="BU"
+scalar spv="71"
+
+* Specify the time interval for the estimates
+* Lmbi and Umbi are the lower and upper range, inclusive, of months before the interview
+* Usually, as for the 7 years before the interview, specify Lmbi=84 and Umbi=1
+scalar Lmbi=84
+scalar Umbi=1
+
+
+local lpath=spath
+local lcid=scid
+local lpv=spv
+
+get_agedist_men
+get_agedist_women
+prepare_mm_file
+get_GFR_exposure
+get_GFR_births
+calculate_rates
+
+* If the survey does not include mm16, the "maternal" rates will produced but will
+*  be 0 and should be ignored. They will not be listed.
+
+* The age-standardized rate for men produced by this program may differ slightly
+*  from those produced by DHS. DHS has incorrectly used the current age distribution
+*  of women to standardize the rates for men, as well as women. This program does not
+*  make that mistake.
+

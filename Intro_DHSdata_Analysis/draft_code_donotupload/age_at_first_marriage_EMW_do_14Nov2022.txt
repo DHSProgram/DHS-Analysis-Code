@@ -1,0 +1,78 @@
+* do e:\DHS\programs\age_at_first_marriage\age_at_first_marriage_EMW_do_14Nov2022.txt
+
+* Construction of table 4.4 (marriage before age 18) in the Bangladesh 2017 final report
+
+* General strategy for EMW surveys: for each original case, add a second case
+*  with residual weight and never-married
+
+* Specify a workspace
+cd e:\DHS\DHS_data\scratch
+
+* Read the IR file
+use "C:\Users\26216\ICF\Analysis - Shared Resources\Data\DHSdata\BDIR7RFL.DTA", clear 
+
+* Must match the covariates in the table with the correct version of awfact
+* Total:                 awfactt
+* Residence:       v025, awfactu
+* Division:        v024, awfactr
+* Education:       v149, awfacte
+* Wealth quintile: v190, awfactw
+
+local letters t u r e w
+
+* restrict to age 20-24
+keep if v013==2
+
+keep v001 v002 v003 v005 v024 v025 v149 v190 v511 awfact*
+gen EMW=1
+gen afm=v511
+
+* Construct weights wt* for the original EMW cases
+foreach ll of local letters {
+gen wt`ll'=v005
+}
+
+save EMW.dta, replace
+
+replace EMW=0
+replace afm=99
+
+* Construct corresponding weights wt* for the artificial NMW cases
+foreach ll of local letters {
+replace wt`ll'=int(((awfact`ll'-100)/100)*v005)
+}
+
+* Combine the EMW and NMW cases
+quietly append using EMW.dta
+
+* Construct the outcome, married before age 18
+gen by18=0
+replace by18=100 if afm<18
+
+save ALL.dta, replace
+
+* Table 4.4. Marriage before age 18
+* Note; the %'s and n's are produced separately.
+* Ignore (!!) the totals rows for the separate panels.
+  
+* Total
+summarize by18 [iweight=wtt/1000000]
+
+* Residence
+tab v025 [fweight=wtu], summarize(by18) means
+tab v025 [iweight=wtu/1000000]
+
+* Division
+tab v024 [fweight=wtr], summarize(by18) means
+tab v024 [iweight=wtr/1000000]
+
+* Education
+tab v149 [fweight=wte], summarize(by18) means
+tab v149 [iweight=wte/1000000]
+
+* Wealth quintile
+tab v190 [fweight=wtw], summarize(by18) means
+tab v190 [iweight=wtw/1000000]
+
+
+

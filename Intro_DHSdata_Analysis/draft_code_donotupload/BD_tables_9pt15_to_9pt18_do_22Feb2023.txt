@@ -1,0 +1,280 @@
+* do e:\DHS\Bangladesh\BD_tables_9pt15_to_9pt18_do_22Feb2023.txt
+
+
+/*
+
+Program to calculate the indicators of postnatal care for the mother and newborn.
+These appear, for example, in tables 9.15 to 9.18 of the Bangladesh 2017-18 DHS Final Report.
+
+The children are the most recent birth in months 0-35
+
+Refer to these tables generically as 1, 2, 3, 4
+The program can be used more generally
+The goal is to reproduce the "totals" rows, not the entire tables
+
+Tables 1 and 2: post-natal care for the mother
+Tables 3 and 4: post-natal care for the child
+
+Tables 1 and 3: The distribution of time to first post-natal check for women/newborns
+ who received that check from a medically trained provider
+
+Tables 2 and 4: The distribution of type of provider for those who received the first
+post-natal check within two days
+
+The names of the constructed variables include "interval" for the time from birth to check
+  and "provider" for the type of person who does the check.
+
+These variables have prefixes "mo" for the mother and "ch" for the child.
+
+The first version of these four variables has suffix "raw" and is a consolidation
+ of the variables for facility birth and home birth.
+
+The second version has no suffix and would be used for further analysis.
+
+The third version has suffix "reduced" and is sthe version used in the tables; in that
+  version, "interval" is restricted to medically trained providers, and "provider" is
+  restricted to a check within the first two days.
+
+The WHO indicator is defined to be the first 2 days, or 48 hours.  The indicator constructed 
+  by DHS includes days 0, 1, and 2, because the time of day of birth is not known. 
+The highest code for time is 202. 
+Under the more typical interpretation of time, the highest code would be 201.
+
+The highest code for medically trained provider could be different in different surveys.
+In the BD 2017-18 survey it is 15.
+
+*/
+
+****************************************************************************
+
+program define define_variables
+
+/* 
+
+Specify the variables for time and provider and list the labels
+
+checked after delivery:                      m62=1, m63 is timing, m64 is provider
+checked after discharge or delivery at home: m66=1, m67 is timing, m68 is provider
+
+The main difficulty is combining two different variables for provider.
+
+Ideal postnatal care if m63 or m67 is <=202 and m64 or m68 is <=15
+
+In the Bangladesh 2017-18 survey, code 15 is the highest code for which the provider 
+  is considered to be medically trained. 
+This number could be different in another survey.  Must check for other surveys.
+
+mointerval_raw is recoded to mointerval and in the table is mointerval_revised. 
+Similarly for chinterval, moprovider, and chprovider
+
+Identify the variable for the interval and the corresponding variable for provider
+m63 and m64 are only coded if m62=1. m67 and m68 are only coded if m66=1.
+
+Labels for intervals and providers in the Bangladesh 2017-18 survey
+
+. label list M63
+M63:
+         100 zero hours
+         201 one day
+         301 one week
+         998 dk
+
+
+ Not all types of providers in the label actually occur in the data
+
+. label list M64
+M64:
+          11 qualified doctor
+          12 nurse/midwife/paramedic
+          13 family welfare visitor
+          14 community skilled birth attendant
+          15 sub-assistant community medical officer
+          16 community health care provider
+          17 health assistant
+          18 family welfare assistant
+          19 ngo worker
+          21 trained tba
+          22 untrained tba
+          23 unqualified doctor
+          96 other
+*/
+
+gen     mointerval_raw=min(m63,m67)
+gen     moprovider_raw=.
+replace moprovider_raw=m64 if mointerval_raw==m63
+replace moprovider_raw=m68 if mointerval_raw==m67
+
+gen     chinterval_raw=min(m71,m75)
+gen     chprovider_raw=m72 if chinterval_raw==m71
+replace chprovider_raw=m76 if chinterval_raw==m75
+
+end
+
+****************************************************************************
+
+program define make_outcomes
+
+* The difference between the following two labels is that "0 hours" is broken out for children but not for mothers.
+
+label define mointerval             1 "0-3 hours" 2 "4-23 hours" 3 "1-2 days" 4 "3-6 days" 5 "7-41 days" 6 "DK" 7 "None"
+label define chinterval 0 "0 hours" 1 "1-3 hours" 2 "4-23 hours" 3 "1-2 days" 4 "3-6 days" 5 "7-41 days" 6 "DK" 7 "None"
+
+* There is no difference between the following two labels.
+
+label define moprovider 1 "Qualified doctor" 2 "Nurse/midwife/parametic/FWV" 3 "CSBA/SACMO" 4 "Other non-medically trained provider" 5 "No check in first 2 days"
+label define chprovider 1 "Qualified doctor" 2 "Nurse/midwife/parametic/FWV" 3 "CSBA/SACMO" 4 "Other non-medically trained provider" 5 "No check in first 2 days"
+
+local moch "mo ch"
+foreach ll of local moch {
+
+gen     `ll'interval=.
+replace `ll'interval=0 if  `ll'interval_raw==100
+replace `ll'interval=1 if (`ll'interval_raw>=101 & `ll'interval_raw<=103)
+replace `ll'interval=2 if (`ll'interval_raw>=104 & `ll'interval_raw<=200)
+replace `ll'interval=3 if (`ll'interval_raw>=201 & `ll'interval_raw<=202)
+replace `ll'interval=4 if (`ll'interval_raw>=203 & `ll'interval_raw<=300)
+replace `ll'interval=5 if (`ll'interval_raw>=301 & `ll'interval_raw<=305)
+replace `ll'interval=6 if (`ll'interval_raw==998)
+replace `ll'interval=7 if `ll'interval_raw==.  
+replace `ll'interval=. if bidx>1 | b19>35
+label values `ll'interval `ll'interval
+
+gen     `ll'provider=5
+replace `ll'provider=1 if `ll'provider_raw==11
+replace `ll'provider=2 if `ll'provider_raw==12 | `ll'provider_raw==13
+replace `ll'provider=3 if `ll'provider_raw==14 | `ll'provider_raw==15
+replace `ll'provider=4 if `ll'provider_raw>=16 & `ll'provider_raw<=96
+replace `ll'provider=. if bidx>1 | b19>35
+
+* For mothers, consolidate interval 0 with interval 1
+* The statement repeats but is better here
+replace mointerval=1 if mointerval==0 
+
+gen     `ll'interval_revised=`ll'interval
+replace `ll'interval_revised=7 if `ll'provider>3
+replace `ll'interval_revised=. if `ll'interval==.
+label values `ll'interval_revised `ll'interval
+
+gen     `ll'provider_revised=`ll'provider 
+replace `ll'provider_revised=5 if `ll'interval_raw>202
+replace `ll'provider_revised=. if `ll'provider==.
+label values `ll'provider_revised `ll'provider
+
+gen     `ll'skilled_provider=0
+replace `ll'skilled_provider=1 if `ll'provider_revised<=3 
+replace `ll'skilled_provider=. if bidx>1 | b19>35
+label values `ll'provider `ll'provider
+
+}
+
+* The "revised" versions of the variables are consistent with the table titles and notes.
+* The conditions are not included in the title.
+
+label variable mointerval         "Interval from birth to first PNC check, mother"
+label variable mointerval_revised "Interval from birth to first PNC check, mother"
+label variable chinterval         "Interval from birth to first PNC check, child"
+label variable chinterval_revised "Interval from birth to first PNC check, child"
+
+label variable moprovider         "Provider of post-natal care for the mother"
+label variable moprovider_revised "Provider of post-natal care for the mother"
+label variable chprovider         "Provider of post-natal care for the child"
+label variable chprovider_revised "Provider of post-natal care for the child"
+
+*tab1 *interval *provider [iweight=v005/1000000]
+
+end
+
+****************************************************************************
+
+program define make_tables
+
+* The column "Percentage of women with a postnatal check during the first 2 days after
+*  birth from a medically trained provider" is included and is exactly the same 
+*  in both tables 1 and 2. This is the variable "moskilled_provider". Similarly for children.
+
+gen wt=v005/1000000
+
+* Construct some but not all of the covariates
+
+* Mother's age at the birth of the child
+gen moage_years=int((b3-v011)/12)
+gen moage=1
+replace moage=2 if moage_years>=20
+replace moage=3 if moage_years>=35
+label variable moage "Age at birth"
+label define moage 1 "<20" 2 "20-34" 3 "35+"
+label values moage moage
+tab moage [iweight=wt]
+drop moage_years
+
+* Birth order
+* To match birth order in the tables, bord must be modified to include multiple births 
+gen border=.
+forvalues ll=1/5 {
+replace border=`ll' if (bord==`ll' & b0==0) | (bord==`ll'+1 & b0==2) | (bord==`ll'+2 & b0==3)
+} 
+gen     birth_order=1 if border==1
+replace birth_order=2 if border>1
+replace birth_order=3 if border>3
+replace birth_order=4 if border>5
+label variable birth_order "Birth order"
+label define birth_order 1 "1" 2 "2-3" 3 "4-5" 4 "6+"
+label values birth_order birth_order
+tab birth_order [iweight=wt]
+drop border
+
+
+* Place of delivery
+gen     facility=2
+replace facility=1 if m15>20
+replace facility=. if bidx>1 | b19>35
+label variable facility "Place of delivery"
+label define facility 1 "Health facility" 2 "Elsewhere"
+label values facility facility 
+
+
+local lcovars moage birth_order facility v025 v190
+
+* Table 1, Intervals for mothers
+foreach lc of local lcovars {
+tab `lc' mointerval_revised [iweight=wt], row
+tab `lc' moskilled_provider [iweight=wt], row
+}
+
+* Table 2, Providers for mothers, totals row
+foreach lc of local lcovars {
+tab `lc' moprovider_revised [iweight=wt], row
+tab `lc' moskilled_provider [iweight=wt], row
+}
+ 
+* Table 3, Intervals for children, totals row
+foreach lc of local lcovars {
+tab `lc' chinterval_revised [iweight=wt], row
+tab `lc' chskilled_provider [iweight=wt], row
+}
+
+* Table 4, Providers for children, totals row
+foreach lc of local lcovars {
+tab `lc' chprovider_revised [iweight=wt], row
+tab `lc' chskilled_provider [iweight=wt], row
+}
+
+end
+
+****************************************************************************
+****************************************************************************
+****************************************************************************
+****************************************************************************
+****************************************************************************
+* Execution begins here
+
+* Read the KR file
+use "C:\Users\26216\ICF\Analysis - Shared Resources\Data\DHSdata\BDKR7RFL.DTA", clear
+
+* The variables and categories may be different in different surveys
+define_variables
+make_outcomes
+make_tables
+
+
+

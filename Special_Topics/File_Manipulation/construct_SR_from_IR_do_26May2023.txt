@@ -1,0 +1,51 @@
+* Construct an SR file, in which cases are siblings in the sibling history
+* Illustrated with Liberia 2019-20 DHS survey
+* Survey-specific modifications would usually be needed
+
+use "C:\Users\26216\ICF\Analysis - Shared Resources\Data\DHSdata\LBIR7AFL.DTA", clear 
+
+* find which mm variables are present and get the label names
+describe mm*_01
+
+keep v001 v002 v003 v005 v008 mm*_*
+drop mmidx* mmc*
+rename *_0* *_*
+reshape long mm1_ mm2_ mm3_ mm4_ mm5_ mm6_ mm7_ mm8_ mm9_ mm10_ mm11_ mm12_ mm13_ mm14_ mm15_ mm16_, i(v001 v002 v003) j(mmidx)
+rename *_ *
+drop if mm1==.
+
+* re-attach the value labels, for those mm variables that have value labels
+local lnumbers 1 2 3 5 6 7 9 10 11 12 13 15 16
+foreach ln of local lnumbers {
+label values mm`ln' MM`ln'_01
+}
+
+* re-attach the variable labels
+label variable mmidx "index to maternal mortality"
+label variable mm1  "sex of sibling"
+label variable mm2  "survival status of sibling"
+label variable mm3  "sibling's current age"
+label variable mm4  "sibling's date of birth (cmc)"
+label variable mm5  "na - sibling's marital status"
+label variable mm6  "years since sibling died"
+label variable mm7  "sibling's age at death"
+label variable mm8  "date of death of sibling (cmc)"
+label variable mm9  "sibling's death and pregnancy"
+label variable mm10 "na - death and a pregnancy are related"
+label variable mm11 "na - cause of death sibling"
+label variable mm12 "amount of time between sibling's delivery and death"
+label variable mm13 "na - place of sibling's death"
+label variable mm14 "na - number of sibling's children"
+label variable mm15 "na - sibling's year of death"
+label variable mm16 "sibling's death due to violence or accident"
+
+* drop mm variables that are na for this survey (could do this earlier)
+drop mm5 mm10 mm11 mm13 mm14 mm15
+
+order v* mm*
+describe
+
+* set up a workspace
+cd e:\DHS\DHS_data\scratch
+
+save LBSR7AFL.dta, replace

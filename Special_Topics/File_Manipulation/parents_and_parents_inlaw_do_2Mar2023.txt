@@ -1,0 +1,156 @@
+* do e:\DHS\programs\household_structure\parents_and_parents_inlaw_do_2Mar2023.txt
+
+/*
+
+Program to identify women who are living with a father-in-law and/or mother-in-law, but more generally,
+  the coresident parents and parents-in-law of a woman or man who are the household head or the spouse of the head.
+
+The relation to head code (hv101) identifies parents (hv101=6) and parents-in-law (hv101=7). If we restrict
+ to household members who are the head (hv101=1) or the spouse (hv101=2), and we use hv104 (1=male, 2=female),
+ we can identify whether the head or spouse is living with their parents or their spouse's parents, and can
+ also identify whether a man is living with his parents or parents in law or a woman is living with her parents
+ or parents-in-law.
+
+IMPORTANT: cases are household members who are either the head or the spouse of the head. 
+
+*/
+
+**************************************************************************************************
+
+program define parents_and_parents_inlaw
+
+* This program includes v024 in the case identifier, because this is required for the India surveys,
+*  but it can be included (although it is not required) in other surveys
+
+* Reduce to variables needed for this program and to merge with other files
+keep hv024 hv001 hv002 hvidx hv005 hv101 hv104 hv105 hv117 hv118
+
+* Check the relation to head code; it is not the same in all surveys. Here it is assumed that
+*  hv101=6 identifies parents of the head and hv101=7 identifies parents-in-law of the head
+
+* list the label, assuming it is HV101, but in some surveys it is hv101
+label list HV101
+tab hv101 hv104
+
+* Identify individual household members by relation to head
+gen   head_male=1 if hv101==1 & hv104==1
+gen head_female=1 if hv101==1 & hv104==2
+gen     husband=1 if hv101==2 & hv104==1
+gen        wife=1 if hv101==2 & hv104==2
+gen          fa=1 if hv101==6 & hv104==1 
+gen          mo=1 if hv101==6 & hv104==2 
+gen    fa_inlaw=1 if hv101==7 & hv104==1 
+gen    mo_inlaw=1 if hv101==7 & hv104==2 
+
+* Assign household-level codes describing the presence of these types of members to everyone in the household
+* The following lines take a lot of time; be patient.
+
+local ltypes "head_male head_female husband wife fa mo fa_inlaw mo_inlaw"
+foreach lt of local ltypes {
+egen n_`lt'=total(`lt'), by(hv024 hv001 hv002)
+}
+
+* Reduce to the individuals who are head or spouse of head, regardless of sex
+* They carry along all the household-level variables
+keep if hv101==1 | hv101==2
+
+* Now classify the households, using the household-level codes that are the same for everyone in the household
+tab1 n_* if hv101==1
+
+* Most n's are only 0 or 1, except that n's for the wife, father-in-law, and mother-in-law may be greater than 1
+
+* Typology for headship; type 2 is most common, type 4 is least common.
+gen     head_type=1 if n_head_male==1   & n_wife==0
+replace head_type=2 if n_head_male==1   & n_wife>0
+replace head_type=3 if n_head_female==1 & n_husband==0
+replace head_type=4 if n_head_female==1 & n_husband>0
+
+label define head_type 1 "male head, no wife" 2 "male head, with wife" 3 "female head, no husband" 4 "female head, with husband"
+label values head_type head_type
+
+* For households as units, restrict to hv101==1
+tab head_type if hv101==1,m
+
+tab head_type hv101
+* There should not be any cases with head_type=1 or 3 and hv101==2. 
+
+gen     parents_of_head=1 if n_fa==0 & n_mo==0
+replace parents_of_head=2 if n_fa==0 & n_mo==1
+replace parents_of_head=3 if n_fa==1 & n_mo==0
+replace parents_of_head=4 if n_fa==1 & n_mo==1
+label define parents 1 "No parent" 2 "Father only" 3 "Mother only" 4 "Both parents"
+label values parents_of_head parents
+tab parents_of_head if hvidx==1,m
+
+gen     parents_inlaw_of_head=1 if n_fa_inlaw==0 & n_mo_inlaw==0
+replace parents_inlaw_of_head=2 if n_fa_inlaw==0 & n_mo_inlaw>0
+replace parents_inlaw_of_head=3 if n_fa_inlaw>0  & n_mo_inlaw==0
+replace parents_inlaw_of_head=4 if n_fa_inlaw>0  & n_mo_inlaw>0
+label define parents_inlaw 1 "No parent in law" 2 "Father in law only" 3 "Mother in law only" 4 "Both parents in law"
+label values parents_inlaw_of_head parents_inlaw
+tab parents_inlaw_of_head if hvidx==1,m
+
+* "man" or "woman" refers only to a man or woman who is either the head or the spouse of the head
+
+* For a woman who is either the wife of the head or the head, her parents in law will be the head's parents if she is the wife
+*   or the head's parents-in-law if she is the head. Similarly for the man.
+
+gen     parents_of_man  =parents_of_head       if hv101==1     & hv104==1
+replace parents_of_man  =parents_inlaw_of_head if head_type==4 & hv104==1
+label values parents_of_man parents
+
+gen     parents_of_woman=parents_of_head       if hv101==1     & hv104==2
+replace parents_of_woman=parents_inlaw_of_head if head_type==2 & hv104==2
+label values parents_of_woman parents
+
+gen     parents_inlaw_of_man=parents_inlaw_of_head   if hv101==1     & hv104==1
+replace parents_inlaw_of_man=parents_of_head         if head_type==4 & hv104==1
+label values parents_inlaw_of_man parents_inlaw
+
+gen     parents_inlaw_of_woman=parents_inlaw_of_head if hv101==1     & hv104==2
+replace parents_inlaw_of_woman=parents_inlaw_of_head if head_type==2 & hv104==2
+label values parents_inlaw_of_woman parents_inlaw
+
+tab head_type parents_of_man
+tab head_type parents_of_woman
+
+tab head_type parents_inlaw_of_man
+tab head_type parents_inlaw_of_woman
+
+* The variables above are sex-specific; consolidate for both men and women
+gen     living_with_parents=parents_of_man   if hv104==1
+replace living_with_parents=parents_of_woman if hv104==2
+label values living_with_parents parents
+
+gen     living_with_parents_inlaw=parents_inlaw_of_man   if hv104==1
+replace living_with_parents_inlaw=parents_inlaw_of_woman if hv104==2
+label values living_with_parents_inlaw parents_inlaw
+
+tab living_with_parents hv104
+tab living_with_parents_inlaw hv104
+
+* IMPORTANT: cases are household members who are either the head or the spouse of the head. 
+
+* This file can be saved
+
+end
+
+**************************************************************************************************
+**************************************************************************************************
+**************************************************************************************************
+**************************************************************************************************
+**************************************************************************************************
+* Execution begins here
+
+* Construct a workspace
+cd e:\DHS\DHS_data\scratch
+
+* Specify the path to the data
+
+scalar spath="C:\Users\26216\ICF\Analysis - Shared Resources\Data\DHSdata" 
+local lpath=spath
+
+* Read the PR file
+use "`lpath'\IAPR7DFL.DTA", clear
+
+parents_and_parents_inlaw

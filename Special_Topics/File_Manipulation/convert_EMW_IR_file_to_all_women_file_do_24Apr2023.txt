@@ -1,0 +1,219 @@
+* do e:\DHS\programs\all_women_factors\convert_EMW_IR_file_to_all_women_file_do_24Apr2023.txt
+
+/*
+The purpose of this program is to avoid the use of all-women-factors (awfact*)  
+
+It constructs, from the PR file, a file of women who are eligible for the individual interview
+  on all criteria OTHER THAN marital status, and appends them to the IR file. 
+
+Variables needed for fertility rates, etc., are assigned default values and relevant hv variables
+  are saved as v variables   
+
+Weights (v005) are re-normalized to have a mean of 1000000 in the new file
+
+The file constructed here can be used for calculating fertility rates, median age at marriage, 
+  and anything else that may be affected by the restriction to ever-married women
+
+Tom Pullum, 2020-2023
+
+emw is 0 for never-married women, 1 for ever-married women
+nmw is 1 for never-married women, 0 for ever-married women
+
+*/
+
+
+******************************************************************************************************
+
+program define construct_all_women_file
+
+* Open the existing IR file, which is restricted to EMW
+
+local ldatapath=sdatapath
+local lcid=scid
+local lpv=spv
+
+use "`ldatapath'\\`lcid'IR`lpv'FL.dta", clear
+
+* Check before the append
+tab bidx_01,m
+
+drop awfact*
+gen awfactt=100
+
+gen emw=1
+gen nmw=0
+quietly append using nmw_file.dta
+
+* Check after the append to confirm the addition of many cases with NA
+tab bidx_01,m
+
+* re-calibrate v005 so the ratio of mean weights in this combined file is the same as in the PR file
+* do not change the IR (emw) weights; instead, multiply the nmw weights (hv005) from the PR file by a factor
+
+summarize v005 if nmw==1
+scalar mean_wt_nmw=r(mean)
+
+summarize v005 if nmw==0
+scalar mean_wt_emw=r(mean)
+
+* the ratio of mean weights, nmw to emw, in the combined file, is mean_wt_nmw/mean_wt_dmw
+* need to multiply the nmw=1 weights by a factor so the ratio matches the ratio in the PR file
+
+scalar mean_wt_ratio_nmw_to_emw=mean_wt_emw/mean_wt_nmw 
+replace v005=v005*mean_wt_ratio_nmw_to_emw if nmw==1
+
+* The following lines confirm that the adjustment to weights for the nmw is correct
+/*
+scalar list mean_wt_ratio_nmw_to_emw
+summarize v005 if nmw==1
+scalar mean_wt_nmw=r(mean)
+summarize v005 if nmw==0
+scalar mean_wt_emw=r(mean)
+scalar mean_wt_ratio_nmw_to_emw=mean_wt_nmw/mean_wt_emw
+scalar list mean_wt_ratio_nmw_to_emw
+*/
+
+
+summarize v007
+if r(mean)<100 {
+replace v007=1900+v007
+}
+
+* The following file is equivalent to an all-women IR file
+save "`lcid'IR`lpv'FL_all_women.dta", replace 
+
+end
+******************************************************************************
+
+program define prepare_nmw_file
+
+* Construct a file of all women who would be eligible under all criteria except EMW status
+
+local ldatapath=sdatapath
+local lcid=scid
+local lpv=spv
+
+use "`ldatapath'\\`lcid'PR`lpv'FL.dta", clear
+local lmarital_status=smarital_status
+
+* Check eligibility vs marital status
+tab hv117 `lmarital_status'
+
+* Select if de facto, female, and age 15-49
+keep if hv103==1 & hv104==2 & hv105>=15 & hv105<=49
+
+* Again check eligibility vs marital status
+tab hv117 `lmarital_status'
+
+keep if `lmarital_status'==0
+
+* Again check eligibility vs marital status
+tab hv117 hv115
+
+
+summarize hv005 if hv117==0
+scalar mean_wt_nmw=r(mean)
+
+summarize hv005 if hv117==1
+scalar mean_wt_emw=r(mean)
+
+scalar mean_wt_ratio_nmw_to_emw=mean_wt_nmw/mean_wt_emw
+scalar list mean_wt_ratio_nmw_to_emw
+
+* We now have a file of women who are nmw but otherwise would be eligible for IR file
+* Construct household-level variables that are in both the PR and IR files
+
+gen v001=hv001
+gen v002=hv002
+gen v003=hvidx
+gen v005=hv005
+gen v006=hv006
+gen v007=hv007
+gen v008=hv008
+gen v022=hv022
+gen v023=hv023
+gen v024=hv024
+gen v025=hv025
+gen v106=hv106
+*gen v190=hv270
+*gen v191=hv271
+
+gen v012=hv105
+*drop hv* sh*
+gen v011=hv008-(6+12*v012)
+gen v013=-2+int(v012/5)
+
+* Construct the variables that are needed for analyses of fertility, marital status, etc
+* There may be more variables than are specified here
+gen v201=0
+gen v218=0
+
+* Age at marriage, etc.
+gen v511=.
+gen v512=.
+
+* Note: variables that should be coded "." for never-married women, such as the b variables,
+*  will be auto-filled with "." after the append
+
+* Marital status. For a given survey you need to check the correspondence between hv515
+*  in the PR file and v501 in the IR file. Ideally they are the same.
+gen v501=0
+gen v502=0
+
+* Construct other variables as needed
+
+gen emw=0
+gen nmw=1
+
+tab nmw,m
+
+* May need more variables!
+* construct caseid if needed
+
+* Can drop PR variables that are not needed
+drop hv* sh*
+
+* The following file does not need to be saved after the append
+save nmw_file.dta, replace
+
+end
+
+******************************************************************************
+******************************************************************************
+******************************************************************************
+******************************************************************************
+******************************************************************************
+******************************************************************************
+******************************************************************************
+******************************************************************************
+* EXECUTION BEGINS HERE
+
+* This program is intended for an EMW survey
+* It constructs an IR file that can be used for calculating fertility rates
+*   without any need for the aw factors
+
+* Specify workspace
+cd e:\DHS\DHS_data\scratch
+
+* Specify path to the data
+scalar sdatapath="C:\Users\26216\ICF\Analysis - Shared Resources\Data\DHSdata"
+
+* Specify the survey with country code and phase/version (cols 1-2 and 5-6 of filename)
+* Illustrate with 
+scalar scid="NP"
+scalar spv="41"
+
+* Specify the name of the variable in the household survey that is 0 if the woman is never-married.
+* In most surveys this is hv115 but in the Nepal 2001 survey it is sh08
+
+scalar smarital_status="hv115"
+
+if scid=="NP" & spv=="41" {
+scalar smarital_status="sh08"
+}
+
+prepare_nmw_file
+construct_all_women_file
+
+
+
